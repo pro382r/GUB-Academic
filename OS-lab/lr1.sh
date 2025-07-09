@@ -1,4 +1,4 @@
-
+#lab report 1
 main(){
  echo "------------------Find the sum of odd and even------------------"
  echo "Enter numbers separated by spaces : "
