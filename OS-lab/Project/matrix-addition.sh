@@ -1,5 +1,7 @@
 #30 % done
 
+#!/bin/bash
+
 # Function to read a matrix from user input
 read_matrix() {
     local name=$1
