@@ -1,7 +1,18 @@
 #!/bin/bash
 
-# Clear solution file
 > matrix_solution.txt
+
+# Thread control variables
+MAX_THREADS=$(nproc)  # Number of CPU cores available
+THREAD_COUNT=0
+
+# Function to wait for threads to complete when max threads are reached
+wait_for_threads() {
+    while (( THREAD_COUNT >= MAX_THREADS )); do
+        wait -n
+        ((THREAD_COUNT--))
+    done
+}
 
 readNumber() {
     local prompt=$1
@@ -36,14 +47,10 @@ generateRandomMatrix() {
 
 format_number() {
     awk -v num="$1" 'BEGIN {
-        # Use a consistent width for all numbers, including padding.
-        # '%9s' for string formatting (to left-align floats), or '%9.2f' for floats
-        # '%9d' for integers.
-        # The goal is to ensure each "cell" takes up the same amount of space.
         if (num == int(num)) {
-            printf "%9d", num  # Pad integers to 9 characters, right-aligned
+            printf "%9d", num
         } else {
-            printf "%9.2f", num # Pad floats to 9 characters with 2 decimal places, right-aligned
+            printf "%9.2f", num
         }
     }'
 }
@@ -58,10 +65,9 @@ printMatrix() {
     for ((i = 0; i < rows; i++)); do
         for ((j = 0; j < cols; j++)); do
             idx=$((i * cols + j))
-            # The format_number function now handles all spacing
             format_number "${matrix[idx]}"
         done
-        echo # Newline after each row
+        echo
     done
     echo
 }
@@ -77,10 +83,9 @@ writeMatrixToFile() {
     for ((i = 0; i < rows; i++)); do
         for ((j = 0; j < cols; j++)); do
             idx=$((i * cols + j))
-            # The format_number function now handles all spacing
             format_number "${matrix[idx]}" >> matrix_solution.txt
         done
-        echo >> matrix_solution.txt # Newline after each row
+        echo >> matrix_solution.txt
     done
     echo >> matrix_solution.txt
 }
@@ -100,10 +105,6 @@ inverse2x2() {
     }') )
 
     echo "Inverse of Matrix $matrix_name:"
-    # Note: For inverse matrices, awk's printf already handles spacing within its output,
-    # so we rely on that. If you need more precise alignment for this specific output,
-    # you might need to process the 'inv' array elements individually with format_number.
-    # For now, printMatrix will use format_number, which should align it.
     printMatrix 2 2 "Inverse Matrix ($matrix_name)" "${inv[@]}"
     writeMatrixToFile 2 2 "Inverse Matrix ($matrix_name)" "${inv[@]}"
 }
@@ -145,7 +146,6 @@ inverse3x3() {
     done
 
     echo "Inverse of Matrix $matrix_name:"
-    # Same note as inverse2x2
     printMatrix 3 3 "Inverse Matrix ($matrix_name)" "${inverse[@]}"
     writeMatrixToFile 3 3 "Inverse Matrix ($matrix_name)" "${inverse[@]}"
 }
@@ -174,10 +174,73 @@ calculateDeterminant3x3() {
     echo "Determinant of Matrix $matrix_name: $det" >> matrix_solution.txt
 }
 
+# Threaded matrix multiplication
+multiplyMatricesThreaded() {
+    local rowsA=$1
+    local colsA=$2
+    local rowsB=$3
+    local colsB=$4
+    local matrixA=("${@:5:$((rowsA * colsA))}")
+    local matrixB=("${@:$((5 + rowsA * colsA))}")
+    local result_matrix=()
+
+    # Initialize result matrix with zeros
+    for ((i = 0; i < rowsA * colsB; i++)); do
+        result_matrix+=(0)
+    done
+
+    # Create a temporary file for thread output
+    local temp_file=$(mktemp)
+
+    # Multiply matrices using threads (one thread per row of result)
+    for ((i = 0; i < rowsA; i++)); do
+        wait_for_threads
+        ((THREAD_COUNT++))
+        
+        (
+            row_results=()
+            for ((j = 0; j < colsB; j++)); do
+                sum=0
+                for ((k = 0; k < colsA; k++)); do
+                    sum=$((sum + matrixA[i*colsA+k] * matrixB[k*colsB+j]))
+                done
+                row_results+=("$sum")
+            done
+            
+            # Write results to temp file with lock
+            (
+                flock -x 200
+                for ((j = 0; j < colsB; j++)); do
+                    result_matrix[i*colsB+j]=${row_results[j]}
+                done
+                printf "%s\n" "${row_results[@]}" >> "$temp_file"
+            ) 200>"$temp_file.lock"
+        ) &
+    done
+
+    wait  # Wait for all threads to complete
+
+    # Read results from temp file
+    local line_num=0
+    while read -r line; do
+        IFS=' ' read -ra values <<< "$line"
+        for ((j = 0; j < colsB; j++)); do
+            result_matrix[line_num*colsB+j]=${values[j]}
+        done
+        ((line_num++))
+    done < "$temp_file"
+
+    # Clean up temp files
+    rm -f "$temp_file" "$temp_file.lock"
+
+    # Return the result matrix
+    echo "${result_matrix[@]}"
+}
+
 # === MAIN ===
 while true; do
     echo "========================================"
-    echo "          Bash Matrix Calculator"
+    echo "     Bash Matrix Calculator (Threads)"
     echo "========================================"
     echo "1. Start New Calculation"
     echo "2. Exit"
@@ -235,7 +298,7 @@ while true; do
 
     echo "1. Addition"
     echo "2. Subtraction"
-    echo "3. Multiplication"
+    echo "3. Multiplication (Threaded)"
     echo "4. Inverse of Matrix A and B (2x2 or 3x3)"
     echo "5. Determinant of Matrix A and B (2x2 or 3x3)"
     echo "6. Exit Program"
@@ -268,19 +331,14 @@ while true; do
                 echo "Error: Matrix A columns must equal Matrix B rows for multiplication."
                 continue
             fi
-            for ((i = 0; i < rowsA; i++)); do
-                for ((j = 0; j < colsB; j++)); do
-                    sum=0
-                    for ((k = 0; k < colsA; k++)); do
-                        sum=$((sum + matrixA[i*colsA+k] * matrixB[k*colsB+j]))
-                    done
-                    result_matrix+=($sum)
-                done
-            done
+            
+            echo "Calculating multiplication using $MAX_THREADS threads..."
+            result_matrix=($(multiplyMatricesThreaded $rowsA $colsA $rowsB $colsB "${matrixA[@]}" "${matrixB[@]}"))
+            
             printMatrix $rowsA $colsB "Result Matrix" "${result_matrix[@]}"
             writeMatrixToFile $rowsA $colsB "Result Matrix" "${result_matrix[@]}"
             ;;
-        4) # Inverse of Matrix A or B
+        4)
             echo "Calculate inverse for which matrix?"
             echo "1. Matrix A"
             echo "2. Matrix B"
@@ -294,7 +352,7 @@ while true; do
                 else
                     echo "Only 2x2 or 3x3 matrices supported for inversion."
                 fi
-            else # inverse_matrix_choice is 2
+            else
                 if [ "$rowsB" -eq 2 ] && [ "$colsB" -eq 2 ]; then
                     inverse2x2 "B" "${matrixB[@]}"
                 elif [ "$rowsB" -eq 3 ] && [ "$colsB" -eq 3 ]; then
@@ -304,7 +362,7 @@ while true; do
                 fi
             fi
             ;;
-        5) # Determinant of Matrix A or B
+        5)
             echo "Calculate determinant for which matrix?"
             echo "1. Matrix A"
             echo "2. Matrix B"
@@ -318,7 +376,7 @@ while true; do
                 else
                     echo "Only 2x2 or 3x3 matrices supported for determinant calculation."
                 fi
-            else # determinant_matrix_choice is 2
+            else
                 if [ "$rowsB" -eq 2 ] && [ "$colsB" -eq 2 ]; then
                     calculateDeterminant2x2 "B" "${matrixB[@]}"
                 elif [ "$rowsB" -eq 3 ] && [ "$colsB" -eq 3 ]; then
@@ -329,6 +387,6 @@ while true; do
             fi
             ;;
     esac
+    echo "Generated on: $(date)" >> matrix_solution.txt
 done
-
-#_________________
+#threads optimized
