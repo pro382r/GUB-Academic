@@ -1,0 +1,208 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Random;
+
+public class ZKPVotingSystem extends JFrame {
+    private JTextArea blockchainDisplay;
+    private JComboBox<String> candidateComboBox;
+    private JTextField voterIdField;
+    private JButton voteButton, verifyButton;
+    private List<Block> blockchain;
+    private Random random;
+
+    // Simulated ECC key pair (for demo purposes)
+    private static class KeyPair {
+        String publicKey;
+        String privateKey;
+        KeyPair(String pub, String priv) {
+            this.publicKey = pub;
+            this.privateKey = priv;
+        }
+    }
+
+    // Block to store encrypted vote
+    private static class Block {
+        String encryptedVote;
+        String zkpProof;
+        String voterId;
+        String previousHash;
+        String hash;
+
+        Block(String encryptedVote, String zkpProof, String voterId, String previousHash) {
+            this.encryptedVote = encryptedVote;
+            this.zkpProof = zkpProof;
+            this.voterId = voterId;
+            this.previousHash = previousHash;
+            this.hash = calculateHash();
+        }
+
+        String calculateHash() {
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                String input = encryptedVote + zkpProof + voterId + previousHash;
+                byte[] hashBytes = digest.digest(input.getBytes());
+                StringBuilder hexString = new StringBuilder();
+                for (byte b : hashBytes) {
+                    String hex = Integer.toHexString(0xff & b);
+                    if (hex.length() == 1) hexString.append('0');
+                    hexString.append(hex);
+                }
+                return hexString.toString();
+            } catch (NoSuchAlgorithmException e) {
+                return "";
+            }
+        }
+    }
+
+    public ZKPVotingSystem() {
+        blockchain = new ArrayList<>();
+        random = new Random();
+        // Initialize blockchain with genesis block
+        blockchain.add(new Block("Genesis", "GenesisProof", "0", "0"));
+
+        // Set up the main window
+        setTitle("Zero-Knowledge Proof Voting System");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        // North panel for voting input
+        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 5, 5));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        inputPanel.add(new JLabel("Voter ID:"));
+        voterIdField = new JTextField();
+        inputPanel.add(voterIdField);
+
+        inputPanel.add(new JLabel("Select Candidate:"));
+        String[] candidates = {"Candidate A", "Candidate B", "Candidate C"};
+        candidateComboBox = new JComboBox<>(candidates);
+        inputPanel.add(candidateComboBox);
+
+        voteButton = new JButton("Cast Vote");
+        verifyButton = new JButton("Verify Vote");
+        inputPanel.add(voteButton);
+        inputPanel.add(verifyButton);
+
+        // Center panel for blockchain display
+        blockchainDisplay = new JTextArea();
+        blockchainDisplay.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(blockchainDisplay);
+        updateBlockchainDisplay();
+
+        // Add components to frame
+        add(inputPanel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
+
+        // Vote button action
+        voteButton.addActionListener(e -> castVote());
+
+        // Verify button action
+        verifyButton.addActionListener(e -> verifyVote());
+
+        setVisible(true);
+    }
+
+    private void castVote() {
+        String voterId = voterIdField.getText().trim();
+        String candidate = (String) candidateComboBox.getSelectedItem();
+
+        if (voterId.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a Voter ID");
+            return;
+        }
+
+        // Simulate ECC encryption
+        KeyPair keyPair = generateKeyPair();
+        String encryptedVote = encryptVote(candidate, keyPair);
+        String zkpProof = generateZKPProof(candidate);
+
+        // Add to blockchain
+        String previousHash = blockchain.get(blockchain.size() - 1).hash;
+        Block newBlock = new Block(encryptedVote, zkpProof, voterId, previousHash);
+        blockchain.add(newBlock);
+
+        updateBlockchainDisplay();
+        JOptionPane.showMessageDialog(this, "Vote cast successfully! Encrypted Vote: " + encryptedVote);
+        voterIdField.setText("");
+    }
+
+    private void verifyVote() {
+        String voterId = voterIdField.getText().trim();
+        if (voterId.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a Voter ID to verify");
+            return;
+        }
+
+        for (Block block : blockchain) {
+            if (block.voterId.equals(voterId)) {
+                boolean isValid = verifyZKP(block.zkpProof);
+                JOptionPane.showMessageDialog(this, 
+                    "Vote Verification: " + (isValid ? "Valid vote" : "Invalid vote") +
+                    "\nEncrypted Vote: " + block.encryptedVote +
+                    "\nNo vote content revealed!");
+                return;
+            }
+        }
+        JOptionPane.showMessageDialog(this, "No vote found for Voter ID: " + voterId);
+    }
+
+    private KeyPair generateKeyPair() {
+        // Simulated key pair generation
+        String pubKey = "PUB_" + random.nextInt(1000000);
+        String privKey = "PRIV_" + random.nextInt(1000000);
+        return new KeyPair(pubKey, privKey);
+    }
+
+    private String encryptVote(String vote, KeyPair keyPair) {
+        // Simulate encryption (in real ZKP, this would use ECC)
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String input = vote + keyPair.privateKey + System.currentTimeMillis();
+            byte[] hashBytes = digest.digest(input.getBytes());
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            return vote + "_encrypted_" + random.nextInt(1000);
+        }
+    }
+
+    private String generateZKPProof(String vote) {
+        // Simulate ZKP proof (in real systems, this would use ZK-SNARKs)
+        return "ZKP_" + vote.hashCode() + "_" + random.nextInt(1000);
+    }
+
+    private boolean verifyZKP(String zkpProof) {
+        // Simulate ZKP verification (always true for demo)
+        return zkpProof.startsWith("ZKP_");
+    }
+
+    private void updateBlockchainDisplay() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== Blockchain ===\n");
+        for (int i = 0; i < blockchain.size(); i++) {
+            Block block = blockchain.get(i);
+            sb.append("Block #").append(i).append(":\n")
+              .append("Voter ID: ").append(block.voterId).append("\n")
+              .append("Encrypted Vote: ").append(block.encryptedVote).append("\n")
+              .append("ZKP Proof: ").append(block.zkpProof).append("\n")
+              .append("Previous Hash: ").append(block.previousHash).append("\n")
+              .append("Hash: ").append(block.hash).append("\n\n");
+        }
+        blockchainDisplay.setText(sb.toString());
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(ZKPVotingSystem::new);
+    }
+}
