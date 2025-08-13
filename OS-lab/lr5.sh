@@ -1,107 +1,62 @@
-read -p "Enter number of frames: " FRAMES
-if ! [[ "$FRAMES" =~ ^[0-9]+$ ]] || [ "$FRAMES" -le 0 ]; then
-  echo "Invalid frame count."
-  exit 1
-fi
+#!/bin/bash
 
-read -p "Enter space-separated page reference string: " -a REF
+# Script to simulate LRU Page Replacement Algorithm
 
-for ((i=0;i<FRAMES;i++)); do
-  frames[i]=-1
-done
+echo "Enter the number of frames:"
+read frames_capacity
 
-declare -A last_used   # last_used[page]=time_index
-hits=0
-misses=0
+echo "Enter the number of pages in the reference string:"
+read num_pages
 
-printf "%-6s %-6s | " "Step" "Page"
-for ((i=0;i<FRAMES;i++)); do
-  printf "F%-2d " $((i+1))
-done
-printf "| %-5s %-7s\n" "Hit?" "Evict"
+echo "Enter the page reference string (space-separated integers):"
+read -a page_string
 
-echo "-------------------------------------------------------------"
+# Initialize frames as an array (to maintain order: index 0 is LRU)
+declare -a frames
 
-time_index=0
-for page in "${REF[@]}"; do
-  if ! [[ "$page" =~ ^-?[0-9]+$ ]]; then
-    echo "Skipping non-numeric token: $page"
-    continue
-  fi
+# Associative array for quick lookup if a page is in frames
+declare -A page_in_frames
 
-  ((time_index++))
+# Counter for page faults
+page_faults=0
 
-  # Check hit
-  hit=0
-  evicted="-"
-  for ((i=0;i<FRAMES;i++)); do
-    if [ "${frames[i]}" == "$page" ]; then
-      hit=1
-      last_used[$page]=$time_index
-      break
-    fi
-  done
-
-  if [ $hit -eq 1 ]; then
-    ((hits++))
-  else
-    ((misses++))
-    # Find empty frame first
-    placed=0
-    for ((i=0;i<FRAMES;i++)); do
-      if [ "${frames[i]}" == "-1" ]; then
-        frames[i]=$page
-        last_used[$page]=$time_index
-        placed=1
-        break
-      fi
+# Function to print current frames
+print_frames() {
+    echo -n "Current frames: "
+    for frame in "${frames[@]}"; do
+        echo -n "$frame "
     done
+    echo ""
+}
 
-    if [ $placed -eq 0 ]; then
-      # Evict least recently used page
-      lru_index=-1
-      lru_time=999999999
-      for ((i=0;i<FRAMES;i++)); do
-        p="${frames[i]}"
-        lu="${last_used[$p]}"
-        if [ -z "$lu" ]; then
-          lu=-1
-        fi
-        if [ "$lu" -lt "$lru_time" ]; then
-          lru_time="$lu"
-          lru_index="$i"
-        fi
-      done
-      evicted="${frames[$lru_index]}"
-      frames[$lru_index]="$page"
-      last_used[$page]=$time_index
-    fi
-  fi
-
-  # Print row
-  printf "%-6d %-6s | " "$time_index" "$page"
-  for ((i=0;i<FRAMES;i++)); do
-    if [ "${frames[i]}" == "-1" ]; then
-      printf "%-3s " "-"
+for page in "${page_string[@]}"; do
+    if [[ ${page_in_frames[$page]} ]]; then
+        # Page hit: Remove page from its position and move to end (most recently used)
+        new_frames=()
+        for f in "${frames[@]}"; do
+            if [[ $f != $page ]]; then
+                new_frames+=("$f")
+            fi
+        done
+        new_frames+=("$page")
+        frames=("${new_frames[@]}")
+        echo "Page $page: Hit"
     else
-      printf "%-3s " "${frames[i]}"
+        # Page fault
+        ((page_faults++))
+        if [[ ${#frames[@]} == $frames_capacity ]]; then
+            # Frames full: Evict LRU (first element)
+            lru_page=${frames[0]}
+            unset page_in_frames[$lru_page]
+            # Shift frames left
+            frames=("${frames[@]:1}")
+        fi
+        # Add new page to end
+        frames+=("$page")
+        page_in_frames[$page]=1
+        echo "Page $page: Fault"
     fi
-  done
-
-  if [ $hit -eq 1 ]; then
-    printf "| %-5s %-7s\n" "Yes" "-"
-  else
-    printf "| %-5s %-7s\n" "No" "$evicted"
-  fi
+    print_frames
 done
 
-echo "-------------------------------------------------------------"
-echo "Total References : $time_index"
-echo "Hits             : $hits"
-echo "Misses           : $misses"
-if [ $time_index -gt 0 ]; then
-  hit_ratio=$(awk "BEGIN { printf \"%.4f\", $hits/$time_index }")
-  miss_ratio=$(awk "BEGIN { printf \"%.4f\", $misses/$time_index }")
-  echo "Hit Ratio        : $hit_ratio"
-  echo "Miss Ratio       : $miss_ratio"
-fi
+echo "Total page faults: $page_faults"
