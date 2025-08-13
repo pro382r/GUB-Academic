@@ -1,5 +1,4 @@
-read -p "Enter number of frames: " cap
-read -p "Enter number of pages: " n
+read -p "Enter number of frames: " cap && read -p "Enter number of pages: " n
 read -p "Enter reference string: " -a pages
 declare -a frames
 declare -A in_frame
@@ -9,6 +8,7 @@ for p in "${pages[@]}"; do
     if [[ ${in_frame[$p]} ]]; then
         frames=(${frames[@]/$p/} "$p")
         echo "Page $p: Hit"
+        ((hit++))
     else
         ((faults++))
         if ((${#frames[@]} == cap)); then
@@ -21,7 +21,7 @@ for p in "${pages[@]}"; do
     fi
     show_frames
 done
-echo "Total page faults: $faults"
+echo -e "Total page faults: $faults \nTotal page hits: $hit"
 
   echo -e "\n=========================END=========================="
 echo "
