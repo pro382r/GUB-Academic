@@ -389,12 +389,6 @@ public class BlockchainVotingSystem extends JFrame {
     
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeel());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            
             new BlockchainVotingSystem().setVisible(true);
         });
     }
