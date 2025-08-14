@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// Represents a single block in the blockchain
+// Represents a single block in the blockchain (GMN)
 class Block {
     public int index;
     public long timestamp;
@@ -73,11 +73,15 @@ class Block {
 
     @Override
     public String toString() {
+        // Safely truncate hash strings for display, show full hash if less than 10 chars
+        String displayPreviousHash = previousHash.length() > 10 ? previousHash.substring(0, 10) + "..." : previousHash;
+        String displayHash = hash.length() > 10 ? hash.substring(0, 10) + "..." : hash;
+
         return "Block #" + index + "\n" +
                "  Timestamp: " + new Date(timestamp) + "\n" +
                "  Data: " + data + "\n" +
-               "  Previous Hash: " + previousHash.substring(0, 10) + "...\n" +
-               "  Hash: " + hash.substring(0, 10) + "...\n" +
+               "  Previous Hash: " + displayPreviousHash + "\n" +
+               "  Hash: " + displayHash + "\n" +
                "  Nonce: " + nonce + "\n";
     }
 }
@@ -154,6 +158,7 @@ public class VotingSystemGUI extends JFrame {
     private JTextArea logArea;
     private Map<String, Integer> voteCounts;
     private ExecutorService executorService; // For asynchronous mining
+    private JPanel topPanel; // Declared as instance variable
 
     public VotingSystemGUI() {
         setTitle("Blockchain Voting System");
@@ -180,7 +185,7 @@ public class VotingSystemGUI extends JFrame {
         setLayout(new BorderLayout(10, 10)); // Add some padding
 
         // --- Top Panel: Voter Input ---
-        JPanel topPanel = new JPanel(new GridBagLayout());
+        topPanel = new JPanel(new GridBagLayout()); // Initialized here
         topPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.GRAY), "Cast Your Vote"));
         topPanel.setBackground(new Color(240, 248, 255)); // AliceBlue
         GridBagConstraints gbc = new GridBagConstraints();
@@ -279,7 +284,9 @@ public class VotingSystemGUI extends JFrame {
         }
 
         // Disable vote button during mining
-        ((JButton) ((JPanel) getContentPane().getComponent(0)).getComponent(topPanel.getComponentCount() - 1)).setEnabled(false);
+        // Now topPanel is an instance variable, so it's accessible.
+        JButton voteButton = (JButton) topPanel.getComponent(topPanel.getComponentCount() - 1);
+        voteButton.setEnabled(false);
         logArea.append("Attempting to cast vote for Voter ID: " + voterId + ", Candidate: " + candidate + "...\n");
 
         // Execute mining in a separate thread to keep GUI responsive
@@ -293,7 +300,8 @@ public class VotingSystemGUI extends JFrame {
                 if (voterAlreadyVoted) {
                     JOptionPane.showMessageDialog(this, "Voter ID " + voterId + " has already voted!", "Vote Error", JOptionPane.WARNING_MESSAGE);
                     SwingUtilities.invokeLater(() -> {
-                        ((JButton) ((JPanel) getContentPane().getComponent(0)).getComponent(topPanel.getComponentCount() - 1)).setEnabled(true);
+                        JButton btn = (JButton) topPanel.getComponent(topPanel.getComponentCount() - 1);
+                        btn.setEnabled(true);
                         logArea.append("Vote failed: Voter already voted.\n");
                     });
                     return;
@@ -309,7 +317,8 @@ public class VotingSystemGUI extends JFrame {
                     updateResultDisplay();
                     logArea.append("Vote successful! Block added to chain.\n");
                     // Re-enable vote button
-                    ((JButton) ((JPanel) getContentPane().getComponent(0)).getComponent(topPanel.getComponentCount() - 1)).setEnabled(true);
+                    JButton btn = (JButton) topPanel.getComponent(topPanel.getComponentCount() - 1);
+                    btn.setEnabled(true);
                     voterIdField.setText(""); // Clear voter ID field
                     candidateGroup.clearSelection(); // Clear candidate selection
                 });
@@ -318,7 +327,8 @@ public class VotingSystemGUI extends JFrame {
                 SwingUtilities.invokeLater(() -> {
                     logArea.append("Error during vote: " + ex.getMessage() + "\n");
                     JOptionPane.showMessageDialog(this, "An error occurred: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    ((JButton) ((JPanel) getContentPane().getComponent(0)).getComponent(topPanel.getComponentCount() - 1)).setEnabled(true);
+                    JButton btn = (JButton) topPanel.getComponent(topPanel.getComponentCount() - 1);
+                    btn.setEnabled(true);
                 });
             }
         });
