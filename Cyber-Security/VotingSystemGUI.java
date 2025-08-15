@@ -205,3 +205,4 @@ public class VotingSystemGUI extends JFrame {
         SwingUtilities.invokeLater(() -> new VotingSystemGUI().setVisible(true));
     }
 }
+//rz-final
