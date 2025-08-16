@@ -2,293 +2,125 @@
 
 > matrix_solution.txt
 
-# Thread control variables
-MAX_THREADS=$(nproc)  # Number of CPU cores available
+MAX_THREADS=$(nproc)
 THREAD_COUNT=0
 
-# Function to wait for threads to complete when max threads are reached
-wait_for_threads() {
-    while (( THREAD_COUNT >= MAX_THREADS )); do
-        wait -n
-        ((THREAD_COUNT--))
-    done
-}
+wait_for_threads() { while (( THREAD_COUNT >= MAX_THREADS )); do wait -n; ((THREAD_COUNT--)); done; }
 
 readNumber() {
-    local prompt=$1
-    local min_val=$2
-    local max_val=${3:-2147483647}
-    local value
-
+    local prompt=$1 min=$2 max=${3:-9999}
     while true; do
-        read -p "$prompt" value
-        if [[ $value =~ ^-?[0-9]+$ ]]; then
-            if (( value >= min_val && value <= max_val )); then
-                echo $value
-                return
-            else
-                echo "Error: Input must be between $min_val and $max_val."
-            fi
-        else
-            echo "Error: Invalid input. Please enter an integer."
-        fi
+        read -p "$prompt" val
+        [[ $val =~ ^-?[0-9]+$ && $val -ge $min && $val -le $max ]] && echo $val && return
+        echo "Error: Enter an integer between $min and $max."
     done
 }
 
 generateRandomMatrix() {
-    local rows=$1
-    local cols=$2
-    local matrix=()
-    for ((i = 0; i < rows * cols; i++)); do
-        matrix+=($((RANDOM % 10)))
-    done
+    local rows=$1 cols=$2 matrix=()
+    for ((i = 0; i < rows * cols; i++)); do matrix+=($((RANDOM % 10))); done
     echo "${matrix[@]}"
 }
 
-format_number() {
-    awk -v num="$1" 'BEGIN {
-        if (num == int(num)) {
-            printf "%9d", num
-        } else {
-            printf "%9.2f", num
-        }
-    }'
-}
+format_number() { awk -v n="$1" 'BEGIN { printf n==int(n) ? "%9d" : "%9.2f", n }'; }
 
 printMatrix() {
-    local rows=$1
-    local cols=$2
-    local name=$3
-    shift 3
-    local matrix=("$@")
+    local rows=$1 cols=$2 name=$3 matrix=("${@:4}")
     echo "$name ($rows x $cols):"
     for ((i = 0; i < rows; i++)); do
-        for ((j = 0; j < cols; j++)); do
-            idx=$((i * cols + j))
-            format_number "${matrix[idx]}"
-        done
+        for ((j = 0; j < cols; j++)); do format_number "${matrix[i*cols+j]}"; done
         echo
     done
     echo
 }
 
 writeMatrixToFile() {
-    local rows=$1
-    local cols=$2
-    local name=$3
-    shift 3
-    local matrix=("$@")
-
-    echo "$name ($rows x $cols):" >> matrix_solution.txt
-    for ((i = 0; i < rows; i++)); do
-        for ((j = 0; j < cols; j++)); do
-            idx=$((i * cols + j))
-            format_number "${matrix[idx]}" >> matrix_solution.txt
-        done
-        echo >> matrix_solution.txt
-    done
-    echo >> matrix_solution.txt
+    printMatrix "$@" >> matrix_solution.txt
 }
 
 inverse2x2() {
-    local matrix_name=$1
-    shift 1
-    local a=$1 b=$2 c=$3 d=$4
-    local det=$((a * d - b * c))
-    if [ "$det" -eq 0 ]; then
-        echo "Matrix $matrix_name is not invertible (det=0)"
-        return 1
-    fi
-
-    local inv=( $(awk -v a="$a" -v b="$b" -v c="$c" -v d="$d" -v det="$det" 'BEGIN {
-        printf "%.6f %.6f %.6f %.6f", d/det, -b/det, -c/det, a/det
-    }') )
-
-    echo "Inverse of Matrix $matrix_name:"
-    printMatrix 2 2 "Inverse Matrix ($matrix_name)" "${inv[@]}"
-    writeMatrixToFile 2 2 "Inverse Matrix ($matrix_name)" "${inv[@]}"
+    local name=$1 a=$2 b=$3 c=$4 d=$5 det=$((a*d - b*c))
+    ((det == 0)) && { echo "Matrix $name not invertible (det=0)"; return 1; }
+    local inv=($(awk -v a="$a" -v b="$b" -v c="$c" -v d="$d" -v det="$det" \
+        'BEGIN { printf "%.2f %.2f %.2f %.2f", d/det, -b/det, -c/det, a/det }'))
+    printMatrix 2 2 "Inverse ($name)" "${inv[@]}"
+    writeMatrixToFile 2 2 "Inverse ($name)" "${inv[@]}"
 }
 
 inverse3x3() {
-    local matrix_name=$1
-    shift 1
-    local m=("$@")
+    local name=$1 m=("${@:2}") det=$(awk -v a="${m[0]}" -v b="${m[1]}" -v c="${m[2]}" \
+        -v d="${m[3]}" -v e="${m[4]}" -v f="${m[5]}" -v g="${m[6]}" -v h="${m[7]}" -v i="${m[8]}" \
+        'BEGIN { print a*(e*i-f*h) - b*(d*i-f*g) + c*(d*h-e*g) }')
+    (( $(echo "$det == 0" | bc) )) && { echo "Matrix $name not invertible (det=0)"; return 1; }
+    local inv=($(awk -v a="${m[0]}" -v b="${m[1]}" -v c="${m[2]}" -v d="${m[3]}" -v e="${m[4]}" \
+        -v f="${m[5]}" -v g="${m[6]}" -v h="${m[7]}" -v i="${m[8]}" -v det="$det" 'BEGIN {
+        printf "%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f",
+        (e*i-f*h)/det, -(b*i-c*h)/det, (b*f-c*e)/det, -(d*i-f*g)/det, (a*i-c*g)/det,
+        -(a*f-c*d)/det, (d*h-e*g)/det, -(a*h-b*g)/det, (a*e-b*d)/det }'))
+    printMatrix 3 3 "Inverse ($name)" "${inv[@]}"
+    writeMatrixToFile 3 3 "Inverse ($name)" "${inv[@]}"
+}
 
-    local a=${m[0]} b=${m[1]} c=${m[2]}
-    local d=${m[3]} e=${m[4]} f=${m[5]}
-    local g=${m[6]} h=${m[7]} i=${m[8]}
-
-    local det=$(awk -v a="$a" -v b="$b" -v c="$c" -v d="$d" -v e="$e" -v f="$f" -v g="$g" -v h="$h" -v i="$i" 'BEGIN {
-        print a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g)
-    }')
-
-    if awk "BEGIN {exit !($det == 0)}"; then
-        echo "Matrix $matrix_name is not invertible (det=0)"
-        return 1
+determinant() {
+    local name=$1 rows=$2 m=("${@:3}") det
+    if [ $rows -eq 2 ]; then
+        det=$((m[0]*m[3] - m[1]*m[2]))
+    else
+        det=$(awk -v a="${m[0]}" -v b="${m[1]}" -v c="${m[2]}" -v d="${m[3]}" -v e="${m[4]}" \
+            -v f="${m[5]}" -v g="${m[6]}" -v h="${m[7]}" -v i="${m[8]}" \
+            'BEGIN { print a*(e*i-f*h) - b*(d*i-f*g) + c*(d*h-e*g) }')
     fi
-
-    local cofactor=( $(awk -v a="$a" -v b="$b" -v c="$c" -v d="$d" -v e="$e" -v f="$f" -v g="$g" -v h="$h" -v i="$i" 'BEGIN {
-        printf "%.6f %.6f %.6f ",  (e*i - f*h), -(d*i - f*g),  (d*h - e*g)
-        printf "%.6f %.6f %.6f ", -(b*i - c*h),  (a*i - c*g), -(a*h - b*g)
-        printf "%.6f %.6f %.6f",   (b*f - c*e), -(a*f - c*d),  (a*e - b*d)
-    }') )
-
-    local adjoint=()
-    for ((col = 0; col < 3; col++)); do
-        for ((row = 0; row < 3; row++)); do
-            adjoint+=( "${cofactor[$((row * 3 + col))]}" )
-        done
-    done
-
-    local inverse=()
-    for val in "${adjoint[@]}"; do
-        inverse+=( $(awk -v val="$val" -v d="$det" 'BEGIN {printf "%.6f", val / d}') )
-    done
-
-    echo "Inverse of Matrix $matrix_name:"
-    printMatrix 3 3 "Inverse Matrix ($matrix_name)" "${inverse[@]}"
-    writeMatrixToFile 3 3 "Inverse Matrix ($matrix_name)" "${inverse[@]}"
+    echo "Det($name): $det" | tee -a matrix_solution.txt
 }
 
-calculateDeterminant2x2() {
-    local matrix_name=$1
-    shift 1
-    local a=$1 b=$2 c=$3 d=$4
-    local det=$((a * d - b * c))
-    echo "Determinant of Matrix $matrix_name: $det"
-    echo "Determinant of Matrix $matrix_name: $det" >> matrix_solution.txt
-}
-
-calculateDeterminant3x3() {
-    local matrix_name=$1
-    shift 1
-    local m=("$@")
-    local a=${m[0]} b=${m[1]} c=${m[2]}
-    local d=${m[3]} e=${m[4]} f=${m[5]}
-    local g=${m[6]} h=${m[7]} i=${m[8]}
-
-    local det=$(awk -v a="$a" -v b="$b" -v c="$c" -v d="$d" -v e="$e" -v f="$f" -v g="$g" -v h="$h" -v i="$i" 'BEGIN {
-        print a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g)
-    }')
-    echo "Determinant of Matrix $matrix_name: $det"
-    echo "Determinant of Matrix $matrix_name: $det" >> matrix_solution.txt
-}
-
-# Threaded matrix multiplication
 multiplyMatricesThreaded() {
-    local rowsA=$1
-    local colsA=$2
-    local rowsB=$3
-    local colsB=$4
-    local matrixA=("${@:5:$((rowsA * colsA))}")
-    local matrixB=("${@:$((5 + rowsA * colsA))}")
-    local result_matrix=()
-
-    # Initialize result matrix with zeros
-    for ((i = 0; i < rowsA * colsB; i++)); do
-        result_matrix+=(0)
-    done
-
-    # Create a temporary file for thread output
-    local temp_file=$(mktemp)
-
-    # Multiply matrices using threads (one thread per row of result)
+    local rowsA=$1 colsA=$2 rowsB=$3 colsB=$4 matrixA=("${@:5:$((rowsA*colsA))}")
+    local matrixB=("${@:$((5+rowsA*colsA)):$((rowsB*colsB))}")
+    local result=($(for ((i=0; i<rowsA*colsB; i++)); do echo 0; done)) tmp=$(mktemp)
     for ((i = 0; i < rowsA; i++)); do
         wait_for_threads
         ((THREAD_COUNT++))
-        
         (
-            row_results=()
+            row=()
             for ((j = 0; j < colsB; j++)); do
                 sum=0
                 for ((k = 0; k < colsA; k++)); do
                     sum=$((sum + matrixA[i*colsA+k] * matrixB[k*colsB+j]))
                 done
-                row_results+=("$sum")
+                row+=("$sum")
             done
-            
-            # Write results to temp file with lock
-            (
-                flock -x 200
-                for ((j = 0; j < colsB; j++)); do
-                    result_matrix[i*colsB+j]=${row_results[j]}
-                done
-                printf "%s\n" "${row_results[@]}" >> "$temp_file"
-            ) 200>"$temp_file.lock"
+            echo "${row[@]}" >> "$tmp"
         ) &
     done
-
-    wait  # Wait for all threads to complete
-
-    # Read results from temp file
-    local line_num=0
-    while read -r line; do
-        IFS=' ' read -ra values <<< "$line"
-        for ((j = 0; j < colsB; j++)); do
-            result_matrix[line_num*colsB+j]=${values[j]}
-        done
-        ((line_num++))
-    done < "$temp_file"
-
-    # Clean up temp files
-    rm -f "$temp_file" "$temp_file.lock"
-
-    # Return the result matrix
-    echo "${result_matrix[@]}"
+    wait
+    readarray -t lines < "$tmp"
+    for ((i = 0; i < rowsA; i++)); do
+        IFS=' ' read -r -a vals <<< "${lines[i]}"
+        for ((j = 0; j < colsB; j++)); do result[i*colsB+j]=${vals[j]}; done
+    done
+    rm "$tmp"
+    echo "${result[@]}"
 }
 
-# === MAIN ===
 while true; do
-    echo "========================================"
-    echo "     Bash Matrix Calculator (Threads)"
-    echo "========================================"
-    echo "1. Start New Calculation"
-    echo "2. Exit"
-    main_menu_option=$(readNumber "Select option: " 1 2)
+    echo -e "\nMatrix Calculator\n1. Calculate\n2. Exit"
+    op=$(readNumber "Option: " 1 2)
+    [ $op -eq 2 ] && break
 
-    if [ "$main_menu_option" -eq 2 ]; then
-        echo "Exiting program."
-        break
-    fi
+    rowsA=$(readNumber "Rows A: " 1)
+    colsA=$(readNumber "Cols A: " 1)
+    rowsB=$(readNumber "Rows B: " 1)
+    colsB=$(readNumber "Cols B: " 1)
 
-    echo "--- Matrix A Dimensions ---"
-    rowsA=$(readNumber "Enter number of rows for Matrix A: " 1)
-    colsA=$(readNumber "Enter number of columns for Matrix A: " 1)
-
-    echo "--- Matrix B Dimensions ---"
-    rowsB=$(readNumber "Enter number of rows for Matrix B: " 1)
-    colsB=$(readNumber "Enter number of columns for Matrix B: " 1)
-
-    echo "1. Auto Generate Random Values"
-    echo "2. Manually Input Values"
-    echo "3. Exit Program"
-    fill_option=$(readNumber "Select option: " 1 3)
-    if [ "$fill_option" -eq 3 ]; then
-        echo "Exiting program."
-        break
-    fi
-
-    if [ "$fill_option" -eq 1 ]; then
+    echo -e "1. Random\n2. Manual\n3. Exit"
+    fill=$(readNumber "Fill: " 1 3)
+    [ $fill -eq 3 ] && break
+    if [ $fill -eq 1 ]; then
         matrixA=($(generateRandomMatrix $rowsA $colsA))
         matrixB=($(generateRandomMatrix $rowsB $colsB))
     else
-        echo "Enter values for Matrix A:"
-        matrixA=()
-        for ((i = 0; i < rowsA; i++)); do
-            for ((j = 0; j < colsA; j++)); do
-                val=$(readNumber "Matrix A [$i][$j]: " -9999)
-                matrixA+=($val)
-            done
-        done
-
-        echo "Enter values for Matrix B:"
-        matrixB=()
-        for ((i = 0; i < rowsB; i++)); do
-            for ((j = 0; j < colsB; j++)); do
-                val=$(readNumber "Matrix B [$i][$j]: " -9999)
-                matrixB+=($val)
-            done
-        done
+        matrixA=(); for ((i=0; i<rowsA*colsA; i++)); do matrixA+=($(readNumber "A[$((i/colsA))][$((i%colsA))]: " -9999)); done
+        matrixB=(); for ((i=0; i<rowsB*colsB; i++)); do matrixB+=($(readNumber "B[$((i/colsB))][$((i%colsB))]: " -9999)); done
     fi
 
     printMatrix $rowsA $colsA "Matrix A" "${matrixA[@]}"
@@ -296,97 +128,39 @@ while true; do
     writeMatrixToFile $rowsA $colsA "Matrix A" "${matrixA[@]}"
     writeMatrixToFile $rowsB $colsB "Matrix B" "${matrixB[@]}"
 
-    echo "1. Addition"
-    echo "2. Subtraction"
-    echo "3. Multiplication (Threaded)"
-    echo "4. Inverse of Matrix A and B (2x2 or 3x3)"
-    echo "5. Determinant of Matrix A and B (2x2 or 3x3)"
-    echo "6. Exit Program"
-    op=$(readNumber "Choose operation: " 1 6)
+    echo -e "1. Add\n2. Subtract\n3. Multiply\n4. Inverse\n5. Det\n6. Exit"
+    op=$(readNumber "Operation: " 1 6)
+    [ $op -eq 6 ] && break
 
-    if [ "$op" -eq 6 ]; then
-        echo "Exiting program."
-        break
-    fi
-
-    result_matrix=()
     case $op in
         1|2)
-            if [ $rowsA -ne $rowsB ] || [ $colsA -ne $colsB ]; then
-                echo "Error: Dimensions must match for addition/subtraction."
-                continue
-            fi
-            for ((i = 0; i < rowsA * colsA; i++)); do
-                if [ $op -eq 1 ]; then
-                    result_matrix+=($((matrixA[i] + matrixB[i])))
-                else
-                    result_matrix+=($((matrixA[i] - matrixB[i])))
-                fi
+            [ $rowsA -ne $rowsB ] || [ $colsA -ne $colsB ] && { echo "Error: Dimensions mismatch"; continue; }
+            result=()
+            for ((i=0; i<rowsA*colsA; i++)); do
+                [ $op -eq 1 ] && result+=($((matrixA[i] + matrixB[i]))) || result+=($((matrixA[i] - matrixB[i])))
             done
-            printMatrix $rowsA $colsA "Result Matrix" "${result_matrix[@]}"
-            writeMatrixToFile $rowsA $colsA "Result Matrix" "${result_matrix[@]}"
+            printMatrix $rowsA $colsA "Result" "${result[@]}"
+            writeMatrixToFile $rowsA $colsA "Result" "${result[@]}"
             ;;
         3)
-            if [ $colsA -ne $rowsB ]; then
-                echo "Error: Matrix A columns must equal Matrix B rows for multiplication."
-                continue
-            fi
-            
-            echo "Calculating multiplication using $MAX_THREADS threads..."
-            result_matrix=($(multiplyMatricesThreaded $rowsA $colsA $rowsB $colsB "${matrixA[@]}" "${matrixB[@]}"))
-            
-            printMatrix $rowsA $colsB "Result Matrix" "${result_matrix[@]}"
-            writeMatrixToFile $rowsA $colsB "Result Matrix" "${result_matrix[@]}"
+            [ $colsA -ne $rowsB ] && { echo "Error: Invalid dimensions"; continue; }
+            result=($(multiplyMatricesThreaded $rowsA $colsA $rowsB $colsB "${matrixA[@]}" "${matrixB[@]}"))
+            printMatrix $rowsA $colsB "Result" "${result[@]}"
+            writeMatrixToFile $rowsA $colsB "Result" "${result[@]}"
             ;;
-        4)
-            echo "Calculate inverse for which matrix?"
-            echo "1. Matrix A"
-            echo "2. Matrix B"
-            inverse_matrix_choice=$(readNumber "Select option: " 1 2)
-
-            if [ "$inverse_matrix_choice" -eq 1 ]; then
-                if [ "$rowsA" -eq 2 ] && [ "$colsA" -eq 2 ]; then
-                    inverse2x2 "A" "${matrixA[@]}"
-                elif [ "$rowsA" -eq 3 ] && [ "$colsA" -eq 3 ]; then
-                    inverse3x3 "A" "${matrixA[@]}"
-                else
-                    echo "Only 2x2 or 3x3 matrices supported for inversion."
-                fi
+        4|5)
+            echo -e "1. Matrix A\n2. Matrix B"
+            choice=$(readNumber "For: " 1 2)
+            if [ $choice -eq 1 ]; then
+                [ $rowsA -ne $colsA ] || ! [[ $rowsA =~ ^[2-3]$ ]] && { echo "Error: 2x2 or 3x3 only"; continue; }
+                [ $op -eq 4 ] && ([ $rowsA -eq 2 ] && inverse2x2 "A" "${matrixA[@]}" || inverse3x3 "A" "${matrixA[@]}") \
+                || determinant "A" $rowsA "${matrixA[@]}"
             else
-                if [ "$rowsB" -eq 2 ] && [ "$colsB" -eq 2 ]; then
-                    inverse2x2 "B" "${matrixB[@]}"
-                elif [ "$rowsB" -eq 3 ] && [ "$colsB" -eq 3 ]; then
-                    inverse3x3 "B" "${matrixB[@]}"
-                else
-                    echo "Only 2x2 or 3x3 matrices supported for inversion."
-                fi
-            fi
-            ;;
-        5)
-            echo "Calculate determinant for which matrix?"
-            echo "1. Matrix A"
-            echo "2. Matrix B"
-            determinant_matrix_choice=$(readNumber "Select option: " 1 2)
-
-            if [ "$determinant_matrix_choice" -eq 1 ]; then
-                if [ "$rowsA" -eq 2 ] && [ "$colsA" -eq 2 ]; then
-                    calculateDeterminant2x2 "A" "${matrixA[@]}"
-                elif [ "$rowsA" -eq 3 ] && [ "$colsA" -eq 3 ]; then
-                    calculateDeterminant3x3 "A" "${matrixA[@]}"
-                else
-                    echo "Only 2x2 or 3x3 matrices supported for determinant calculation."
-                fi
-            else
-                if [ "$rowsB" -eq 2 ] && [ "$colsB" -eq 2 ]; then
-                    calculateDeterminant2x2 "B" "${matrixB[@]}"
-                elif [ "$rowsB" -eq 3 ] && [ "$colsB" -eq 3 ]; then
-                    calculateDeterminant3x3 "B" "${matrixB[@]}"
-                else
-                    echo "Only 2x2 or 3x3 matrices supported for determinant calculation."
-                fi
+                [ $rowsB -ne $colsB ] || ! [[ $rowsB =~ ^[2-3]$ ]] && { echo "Error: 2x2 or 3x3 only"; continue; }
+                [ $op -eq 4 ] && ([ $rowsB -eq 2 ] && inverse2x2 "B" "${matrixB[@]}" || inverse3x3 "B" "${matrixB[@]}") \
+                || determinant "B" $rowsB "${matrixB[@]}"
             fi
             ;;
     esac
-    echo "Generated on: $(date)" >> matrix_solution.txt
+    echo "Generated: $(date)" >> matrix_solution.txt
 done
-#threads optimized
