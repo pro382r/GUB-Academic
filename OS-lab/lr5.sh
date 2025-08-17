@@ -1,4 +1,4 @@
-read -p "Enter number of frames: " cap && read -p "Enter number of pages: " n
+read -p "Enter number of frames: " cap #&& read -p "Enter number of pages: " n
 read -p "Enter reference string: " -a pages
 declare -a frames
 declare -A in_frame
