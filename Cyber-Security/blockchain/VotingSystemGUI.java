@@ -365,7 +365,7 @@ public class VotingSystemGUI extends JFrame {
         resultDisplayArea.setText(sb.toString());
     }
 
-    public static void main(String[] args) {
+    pub♦,lic static void main(String[] args) {
         // Ensure GUI updates are done on the Event Dispatch Thread
         SwingUtilities.invokeLater(() -> {
             new VotingSystemGUI().setVisible(true);
