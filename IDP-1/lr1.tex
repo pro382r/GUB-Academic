@@ -1,0 +1,319 @@
+%CV
+
+\documentclass[10pt, a4paper]{scrartcl}
+
+% PACKAGES
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{comment}
+\usepackage{fontawesome5}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{tikz}
+\usepackage{ragged2e}
+\usepackage{afterpage}
+\usepackage{fancyhdr}
+
+% Set narrow margins for a dense, full-page CV look
+\geometry{
+  a4paper,
+  left=0.5in,
+  right=0.5in,
+  top=0.7in,
+  bottom=0.7in,
+  headheight=0pt,
+  headsep=0pt,
+  footskip=0pt
+}
+
+% COLORS
+\definecolor{SidebarColor}{HTML}{1A4780} % Dark Blue
+\definecolor{AccentColor}{HTML}{1A4780} % Dark Blue for rule/accents
+\definecolor{TextWhite}{HTML}{FFFFFF}
+
+% --- CUSTOM COMMANDS AND ENVIRONMENTS ---
+
+% Custom section titles for the right column (with accent line)
+\titleformat{\section}{\vspace{8pt}\normalfont\Large\bfseries\color{AccentColor}\MakeUppercase}{}{0pt}{}
+
+% The two thin rules are added manually here instead of using titlerule, for better control
+\newcommand{\maintitle}[1]{
+    \section*{#1}
+    \vspace{-6pt} % Reduce space after section title
+    \hrule height 0.5pt \vspace{2pt}
+    \hrule height 0.5pt \vspace{4pt}
+}
+\titlespacing{\section}{0pt}{10pt}{4pt}
+
+% Custom section titles for the sidebar (left column, white text)
+\newcommand{\sidebarsection}[1]{%
+    \vspace{6pt}\color{TextWhite}\normalfont\large\bfseries\MakeUppercase{#1}\par\vspace{2pt}%
+    \color{TextWhite}\rule{0.9\linewidth}{0.5pt}%
+    \vspace{4pt}
+}
+
+% Command for Experience entries
+\newcommand{\experience}[4]{%
+    \vspace{4pt}
+    \textbf{#1} \hfill \textit{#2} \\
+    \textit{#3} \par % Position/Subtitle
+    \vspace{2pt}
+    \begin{itemize}[label=\tiny\textbullet, noitemsep, topsep=2pt, parsep=0pt, leftmargin=1em]
+        #4
+    \end{itemize}
+}
+
+% Command for Education entries
+\newcommand{\education}[3]{%
+    \vspace{4pt}
+    \begin{itemize}[label=\tiny\textbullet, noitemsep, topsep=2pt, parsep=0pt, leftmargin=1em]
+        \item \textbf{#1} \hfill \textit{#3} \\
+        \hspace{0.5em} \textit{#2}
+    \end{itemize}
+}
+
+\pagestyle{empty} % Remove page numbers
+\raggedright % Ensure text aligns left
+
+% --- DOCUMENT START ---
+\begin{document}
+
+% ===== COVER PAGE =====
+\begin{titlepage}
+    \centering
+
+    \begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.4\textwidth]{Figure/GUBLogo-42.png}
+    %\caption{This is the caption for the image.}
+\end{figure}
+
+
+    
+% University Info
+
+\begin{center}
+    {\LARGE \textbf{Green University of Bangladesh}} \\[0.4cm]
+    {\Large \textbf{Department of Computer Science and Engineering (CSE)}} \\[0.3cm]
+    {\large Faculty of Sciences and Engineering} \\[0.3cm]
+    {\large Semester: (Fall, Year:2025), B.Sc. in CSE (Day)} \\[0.9cm]
+    {\Large \textbf{Lab Report NO : 01}} \\[0.4cm]
+    {\large \textbf{Course Title: Integrated Design Project 1 }} \\[0.3cm]
+    {\large \textbf{Course Code: CSE 324 \hspace{1cm} Section: 223-D1}} \\
+\end{center}
+
+\vspace{0.5cm}
+
+    
+    \vspace{1cm}
+    
+    % Lab Experiment Name
+    {\Large\bfseries Lab Experiment Name: Implement CV design in \LaTeX. \par}
+    
+    %\rule{\textwidth}{1pt}
+    
+    \vspace{2cm}
+    
+    % Student Details
+    \begin{minipage}{0.5\textwidth}
+        \centering
+        {\large\bfseries Student Details\par}
+        \vspace{0.5cm}
+        
+        {\renewcommand{\arraystretch}{2}
+    \begin{tabular}{| p{6cm} | p{3cm} |} 
+    \hline
+    \textbf{Name} & \textbf{ID} \\
+    \hline
+    Md. REAHOON ZANNAH & 223002038 \\
+    \hline
+    \end{tabular}
+    }
+
+    \end{minipage}
+        \vspace{1.5cm}
+
+    
+    % Dates and Teacher
+    \begin{flushleft}
+        \large
+        \textbf{Lab Date:} 07-10-2025\par
+        \vspace{0.3cm}
+        \textbf{Submission Date:} 14-10-2025\par
+        \vspace{0.3cm}
+        \textbf{Course Teacher's Name:} Fatema Akter\par
+    \end{flushleft}
+    
+    \vspace{1cm}
+    
+    % Lab Report Status
+    \begin{minipage}{\textwidth}
+        \centering
+        {\large\bfseries Lab Report Status\par}
+        \vspace{0.7cm}
+        {\renewcommand{\arraystretch}{2}
+        \begin{tabular}{|p{0.4\textwidth} p{0.5\textwidth}|}
+            \hline
+            Marks: ................................................. & Comments: ............................................................. \\
+            
+            Signature: ........................................... & Date: .................................................................. \\
+            \hline
+        \end{tabular}
+        }
+    \end{minipage}
+    
+\end{titlepage}
+
+% ===== CV PAGE =====
+% --- Two Column Layout using minipages ---
+
+% Left Sidebar Minipage (28% width, blue background)
+\begin{minipage}[t]{0.28\textwidth}
+    % Fill the entire minipage background with the SidebarColor
+    \colorbox{SidebarColor}{
+        \begin{minipage}[t]{\linewidth}
+            \vspace{0pt} % Push content to top
+            \justifying % Restore justification inside the colorbox
+
+            % PHOTO PLACEHOLDER (Circular)
+            \begin{center}
+            \vspace{5pt}
+                % The original placeholder is replaced with the user's photo (abc.png)
+                % The tikzpicture is used here to draw a white circular border around the image
+                \begin{tikzpicture}
+                    % Define the radius for the circle
+                    \pgfmathsetmacro{\radius}{1.3}
+                    % Use \clipkit to crop the image into a circle
+                    \clip[circle] (0,0) circle (\radius cm);
+                    % Include the image, scaling it to cover the circle
+                    \node at (0,0) {\includegraphics[width=2.6cm, height=2.6cm, keepaspectratio=false]{Figure/IMG_1270-light-sq.jpg}
+                    };
+                    % Draw a white border around the image
+                    \draw[white, thick] (0,0) circle (\radius cm);
+                \end{tikzpicture}
+            \end{center}
+        \vspace{10pt}
+
+            % CONTACT
+            \sidebarsection{CONTACT}
+            \begin{flushleft}
+                \color{TextWhite} \footnotesize
+                \textbf{\faPhone\ 01771189608} \\
+                \textbf{\faEnvelope\ 223002038@student.green.ac.bd} \\
+                \textbf{\faMapMarker\ Kanchan, Rupganj, Narayanganj, Dhaka, Bangladesh} \\
+                \textbf{\faGlobe\ www.linkedin.com/in/md-reahoon-zannah}
+            \end{flushleft}
+            \vspace{10pt}
+
+            % SKILLS
+            \sidebarsection{SOFT SKILLS}
+            \begin{itemize}[label=\color{TextWhite}\tiny\textbullet, noitemsep, topsep=2pt, parsep=0pt, leftmargin=1em]
+                \color{TextWhite} \footnotesize
+                \item Project Management
+                \item Public Relations
+                \item Teamwork
+                \item Time Management
+                \item Leadership
+                \item Effective Communication
+                \item Critical Thinking
+            \end{itemize}
+            \vspace{10pt}
+
+            % LANGUAGES
+            \sidebarsection{LANGUAGES}
+            \begin{flushleft}
+                \color{TextWhite} \footnotesize
+                \textbf{English} (Fluent) \\
+                \textbf{Bangla} (Fluent) \\
+                \textbf{Hindi} (Basics) \\
+            \end{flushleft}
+            \vspace{10pt}
+
+             % REFERENCE
+            \sidebarsection{REFERENCE}
+            \begin{flushleft}
+                \color{TextWhite} \footnotesize
+                \textbf{Estelle Darcy} \\
+                Wardiere Inc. / CTO \\
+                Phone: 123-456-7890 \\
+                Email: hello@reallygreatsite.com \\
+                \vspace{5pt}
+
+            \end{flushleft}
+            \vspace{0pt}
+
+        \end{minipage}
+    }
+\end{minipage}%
+\hfill%
+% Right Main Content Minipage (70% width, white background)
+\begin{minipage}[t]{0.68\textwidth}
+    \vspace{0pt} % Push content to top
+
+    % --- HEADER: NAME AND TITLE ---
+    \begin{center}
+        \Huge\textbf{MD. REAHOON ZANNAH} \\
+        \Large\color{AccentColor}\textbf{CSE ENGINEER}
+    \end{center}
+    \vspace{8pt}
+
+    % PROFILE
+    \maintitle{PROFILE} 
+    \small
+    Detail-oriented CSE Engineer proficient in Python, Java, and C-Sharp. Passionate about continuous learning and leveraging cutting-edge technology to build scalable and reliable systems. Ready to tackle complex technical challenges and deliver high-quality results.
+
+    % WORK EXPERIENCE
+    \maintitle{HARD SKILLS \& COMPETENCIES}
+
+    \begin{itemize}
+        \item \textbf{Machine Learning Model Development:}
+        {Tensorflow}
+    
+
+        \item \textbf{Frontend Framework:}
+        {Html, CSS, Java Script, React}
+
+        \item  \textbf{Backend Language:}
+        {Django, Node.js}
+
+        \item \textbf{Database Management:}
+        {MYSQL}
+
+        \item \textbf{Other Language: }
+        {C, C-Sharp, Java, Shell}
+
+    \end{itemize}
+
+    
+%    \experience
+%   {Fauget Studio}
+%    {2025--2029}
+%    {Marketing Manager \& Specialist}
+%    {
+%        \item Create and manage the marketing budget, ensuring efficient allocation of resources and optimizing ROI.
+%        \item Oversee market research to identify emerging trends, customer needs, and competitor strategies.
+%        \item Monitor brand consistency across marketing channels and materials.
+%    }
+    
+
+    \maintitle{CERTIFICATIONS}
+
+    \education{Microsoft Certified: Azure Solutions Architect Expert}{Microsoft}{06/2023}
+
+    \education{DLA Certified: Edge Project}{Python, Django}{11/2024}
+
+
+    
+    % EDUCATION
+    \maintitle{EDUCATION}
+
+    \education{GREEN UNIVERSITY of BANGLADESH}{Bachelor of Science (GPA: 3.0/4.0)}{2022 -- Present}
+
+    \education{Mymensingh Commerce College}{HSC (GPA 5.0/5.0)}{2018 -- 2020}
+
+    \education{Govt. Laboratory High School Mymensingh}{SSC (GPA 4.89/5.0)}{2016 -- 2018}
+
+
+\end{minipage}
+
+\end{document}
