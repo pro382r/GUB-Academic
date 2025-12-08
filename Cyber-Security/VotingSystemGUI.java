@@ -198,7 +198,7 @@ public class VotingSystemGUI extends JFrame {
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                 .map(e -> "Candidate " + e.getKey() + ": " + e.getValue() + " votes")
                 .reduce("", (a, b) -> a + b + "\n"),
-            blockchain.isValid() ? "Blockchain is VALID! ✅" : "Blockchain INVALID! 🚨"));
+            blockchain.isValid() ? "Blockchain is VALID! ✅" : "Blockchain INVALID!"));
     }
 
     public static void main(String[] args) {
