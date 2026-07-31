@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Donors | LifeDrop</title>
+<link rel="stylesheet" href="all-donor-list.css">
+</head>
+<body>
+<header>
+<div class="container">
+
+<a href="../index.html" class="logo">
+🩸 <span>LifeDrop</span>
+</a>
+
+<nav>
+
+<a href="all-donor-list.html" class="active">
+Donor List
+</a>
+
+<a href="donor-add.html">
+Add Donor
+</a>
+
+<a href="update.html">
+Update Donor
+</a>
+
+<a href="donor-remove.html">
+Remove Donor
+</a>
+
+</nav>
+</div>
+</header>
+<section class="table-section">
+<div class="table-card">
+<h1>All Donors</h1>
+<p>
+Registered Blood Donors
+</p>
+
+<table>
+<thead><tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Age</th>
+    <th>Gender</th>
+    <th>Blood Group</th>
+    <th>Phone</th>
+    <th>Email</th>
+    <th>Address</th>
+    <th>Last Donation</th>
+    <th>Status</th>
+</tr>
+</thead>
+<tbody id="donorTable">
+<tr>
+
+<td colspan="9">
+Loading donors...
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<script src="all-donor-list.js"></script>
+</body>
+</html>

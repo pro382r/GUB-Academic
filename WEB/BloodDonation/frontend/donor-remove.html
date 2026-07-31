@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Donor | LifeDrop</title>
+    <link rel="stylesheet" href="donor-remove.css">
+
+</head>
+
+<body>
+<header>
+    <div class="container">
+
+        <a href="../index.html" class="logo">
+            🩸 <span>LifeDrop</span>
+        </a>
+
+        <nav>
+
+            <a href="all-donor-list.html">Donor List</a>
+            <a href="donor-add.html">Add Donor</a>
+            <a href="update.html">Update Donor</a>
+            <a href="donor-remove.html" class="active">Remove Donor</a>
+
+        </nav>
+    </div>
+</header>
+<main>
+<section class="remove-section">
+<div class="remove-card">
+<h1>Remove Donor</h1>
+
+<p>
+Search a donor by Name or Phone Number.
+</p>
+
+<!-- Search Form -->
+
+<form
+    id="searchForm"
+    action="../backend/donor_search.php"
+    method="POST"
+>
+
+<div class="input-group">
+
+<label for="search">
+
+Search Donor
+
+</label>
+
+<input
+    type="text"
+    id="search"
+    name="search"
+    placeholder="Enter Name or Phone Number"
+    required
+>
+
+</div>
+
+<button
+    type="submit"
+    class="btn-search"
+>
+
+Search
+
+</button>
+
+</form>
+
+<!-- =============================
+     Search Result
+============================== -->
+
+<div
+class="donor-info"
+id="donorInfo"
+style="display:none;"
+>
+
+<h2>Donor Information</h2>
+
+<div class="info-row">
+<strong>ID :</strong>
+<span id="showID"></span>
+</div>
+
+<div class="info-row">
+<strong>Name :</strong>
+<span id="showName"></span>
+</div>
+
+<div class="info-row">
+<strong>Age :</strong>
+<span id="showAge"></span>
+</div>
+
+<div class="info-row">
+<strong>Gender :</strong>
+<span id="showGender"></span>
+</div>
+
+<div class="info-row">
+<strong>Blood Group :</strong>
+<span id="showBlood"></span>
+</div>
+
+<div class="info-row">
+<strong>Phone :</strong>
+<span id="showPhone"></span>
+</div>
+
+<div class="info-row">
+<strong>Email :</strong>
+<span id="showEmail"></span>
+</div>
+
+<div class="info-row">
+<strong>Address :</strong>
+<span id="showAddress"></span>
+</div>
+
+<div class="info-row">
+<strong>Last Donation :</strong>
+<span id="showDonation"></span>
+</div>
+
+<form
+action="../backend/delete_donor.php"
+method="POST"
+>
+
+<input
+type="hidden"
+id="deleteID"
+name="donor_id"
+>
+
+<button
+type="submit"
+class="btn-delete"
+>
+
+Delete Donor
+
+</button>
+
+</form>
+</div>
+</div>
+</section>
+</main>
+
+<script src="donor-remove.js"></script>
+</body>
+</html>

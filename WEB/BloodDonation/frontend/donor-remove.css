@@ -1,0 +1,260 @@
+/* ===========================
+   RESET
+=========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    color:#333;
+}
+
+/* ===========================
+   HEADER
+=========================== */
+
+header{
+    width:100%;
+    background:#b71c1c;
+    box-shadow:0 3px 10px rgba(0,0,0,.15);
+}
+
+.container{
+    width:90%;
+    max-width:1200px;
+    margin:auto;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:18px 0;
+}
+
+.logo{
+    text-decoration:none;
+    color:#fff;
+    font-size:28px;
+    font-weight:bold;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.logo span{
+    color:#fff;
+}
+
+nav{
+    display:flex;
+    gap:22px;
+}
+
+nav a{
+    text-decoration:none;
+    color:#fff;
+    transition:.3s;
+}
+
+nav a:hover,
+nav a.active{
+    color:#ffd54f;
+}
+
+/* ===========================
+   REMOVE FORM
+=========================== */
+
+.remove-section{
+
+    min-height:calc(100vh - 80px);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:40px 20px;
+}
+
+.remove-card{
+
+    width:100%;
+    max-width:550px;
+
+    background:#fff;
+
+    padding:40px;
+
+    border-radius:15px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+
+}
+
+.remove-card h1{
+
+    text-align:center;
+
+    color:#c62828;
+
+    margin-bottom:10px;
+
+}
+
+.remove-card p{
+
+    text-align:center;
+
+    color:#666;
+
+    margin-bottom:30px;
+
+    line-height:1.6;
+
+}
+
+/* ===========================
+   INPUT
+=========================== */
+
+.input-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    margin-bottom:25px;
+
+}
+
+.input-group label{
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+}
+
+.input-group input{
+
+    padding:14px;
+
+    border:1px solid #ccc;
+
+    border-radius:8px;
+
+    font-size:16px;
+
+    transition:.3s;
+
+}
+
+.input-group input:focus{
+
+    outline:none;
+
+    border-color:#c62828;
+
+    box-shadow:0 0 8px rgba(198,40,40,.25);
+
+}
+
+/* ===========================
+   BUTTONS
+=========================== */
+
+.button-group{
+
+    display:flex;
+
+    gap:15px;
+
+}
+
+.button-group button{
+
+    flex:1;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    transition:.3s;
+
+}
+
+.btn-delete{
+
+    background:#d32f2f;
+
+    color:#fff;
+
+}
+
+.btn-delete:hover{
+
+    background:#b71c1c;
+
+}
+
+.btn-reset{
+
+    background:#757575;
+
+    color:#fff;
+
+}
+
+.btn-reset:hover{
+
+    background:#555;
+
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media(max-width:768px){
+
+    .container{
+
+        flex-direction:column;
+
+        gap:20px;
+
+    }
+
+    nav{
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+
+    }
+
+    .remove-card{
+
+        padding:25px;
+
+    }
+
+    .button-group{
+
+        flex-direction:column;
+
+    }
+
+}

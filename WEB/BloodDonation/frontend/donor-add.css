@@ -1,0 +1,309 @@
+/* ===========================
+   RESET
+=========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    color:#333;
+}
+
+/* ===========================
+   HEADER
+=========================== */
+
+header{
+    width:100%;
+    background:#b71c1c;
+    box-shadow:0 3px 10px rgba(0,0,0,.15);
+}
+
+.container{
+    width:90%;
+    max-width:1200px;
+    margin:auto;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:18px 0;
+}
+
+.logo{
+    text-decoration:none;
+    color:#fff;
+    font-size:28px;
+    font-weight:bold;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.logo span{
+    color:#fff;
+}
+
+nav{
+    display:flex;
+    gap:22px;
+}
+
+nav a{
+    text-decoration:none;
+    color:#fff;
+    font-size:16px;
+    transition:.3s;
+}
+
+nav a:hover,
+nav a.active{
+    color:#ffd54f;
+}
+
+/* ===========================
+   FORM SECTION
+=========================== */
+
+.form-section{
+
+    min-height:calc(100vh - 80px);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:60px 20px;
+}
+
+.form-card{
+
+    width:100%;
+    max-width:750px;
+
+    background:#fff;
+
+    border-radius:15px;
+
+    padding:40px;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+
+}
+
+.form-card h1{
+
+    text-align:center;
+
+    color:#b71c1c;
+
+    margin-bottom:10px;
+
+}
+
+.form-card p{
+
+    text-align:center;
+
+    color:#666;
+
+    margin-bottom:35px;
+
+}
+
+/* ===========================
+   INPUT GROUP
+=========================== */
+
+.input-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    margin-bottom:22px;
+
+}
+
+.input-group label{
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea{
+
+    padding:14px;
+
+    border:1px solid #ccc;
+
+    border-radius:8px;
+
+    font-size:15px;
+
+    transition:.3s;
+
+}
+
+.input-group textarea{
+
+    resize:vertical;
+
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus{
+
+    outline:none;
+
+    border-color:#c62828;
+
+    box-shadow:0 0 8px rgba(198,40,40,.25);
+
+}
+
+/* ===========================
+   RADIO BUTTON
+=========================== */
+
+.radio-group{
+
+    display:flex;
+
+    gap:30px;
+
+    margin-top:5px;
+
+}
+
+.radio-group label{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    font-weight:500;
+
+    cursor:pointer;
+
+}
+
+/* ===========================
+   BUTTONS
+=========================== */
+
+.button-group{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:15px;
+
+    margin-top:30px;
+
+}
+
+.button-group button{
+
+    flex:1;
+
+    padding:15px;
+
+    border:none;
+
+    border-radius:8px;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.btn-submit{
+
+    background:#c62828;
+
+    color:#fff;
+
+}
+
+.btn-submit:hover{
+
+    background:#a31515;
+
+}
+
+.btn-reset{
+
+    background:#757575;
+
+    color:#fff;
+
+}
+
+.btn-reset:hover{
+
+    background:#555;
+
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media(max-width:768px){
+
+    .container{
+
+        flex-direction:column;
+
+        gap:20px;
+
+    }
+
+    nav{
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+
+    }
+
+    .form-card{
+
+        padding:25px;
+
+    }
+
+    .radio-group{
+
+        flex-direction:column;
+
+        gap:12px;
+
+    }
+
+    .button-group{
+
+        flex-direction:column;
+
+    }
+
+}

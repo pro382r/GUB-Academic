@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeDrop | Blood Donation System</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:"Segoe UI",sans-serif;
+        }
+
+        html{
+            scroll-behavior:smooth;
+        }
+
+        body{
+            background:#f5f5f5;
+        }
+
+        /* ================= NAVBAR ================= */
+
+        nav{
+            width:100%;
+            position:fixed;
+            top:0;
+            left:0;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:18px 8%;
+            background:rgba(0,0,0,.35);
+            backdrop-filter:blur(10px);
+            z-index:999;
+        }
+
+        .logo{
+            text-decoration:none;
+            color:#fff;
+            font-size:30px;
+            font-weight:700;
+            letter-spacing:1px;
+        }
+
+        .logo span{
+            color:#ff4b4b;
+        }
+
+        nav ul{
+            list-style:none;
+            display:flex;
+            gap:28px;
+        }
+
+        nav ul li a{
+            color:#fff;
+            text-decoration:none;
+            font-size:16px;
+            font-weight:500;
+            transition:.3s;
+        }
+
+        nav ul li a:hover{
+            color:#ff5a5a;
+        }
+
+        /* ================= HERO ================= */
+
+        .hero{
+            min-height:100vh;
+
+            background:
+                linear-gradient(
+                    rgba(90,0,0,.82),
+                    rgba(40,0,0,.88)
+                ),
+                url("https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&w=1920&q=80");
+
+            background-size:cover;
+            background-position:center;
+            background-repeat:no-repeat;
+            background-attachment:fixed;
+
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            flex-direction:column;
+
+            text-align:center;
+            color:#fff;
+
+            position:relative;
+            overflow:hidden;
+        }
+
+        .hero::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:radial-gradient(
+                circle,
+                rgba(255,0,0,.08) 0%,
+                rgba(0,0,0,.45) 100%
+            );
+        }
+
+        .hero-content{
+            position:relative;
+            z-index:2;
+        }
+
+        .hero h1{
+            font-size:72px;
+            margin-bottom:20px;
+            letter-spacing:2px;
+            color:#ff5a5a;
+        }
+
+        .hero p{
+            font-size:22px;
+            max-width:700px;
+            margin:auto;
+            color:#ececec;
+            line-height:1.8;
+        }
+
+        .hero-btn{
+            margin-top:40px;
+        }
+
+        .hero-btn a{
+            display:inline-block;
+            text-decoration:none;
+            color:#fff;
+            background:#c62828;
+            padding:15px 38px;
+            border-radius:50px;
+            font-size:18px;
+            font-weight:600;
+            transition:.3s;
+            box-shadow:0 10px 25px rgba(198,40,40,.35);
+        }
+
+        .hero-btn a:hover{
+            background:#a30000;
+            transform:translateY(-3px);
+        }
+
+        /* ================= Responsive ================= */
+
+        @media(max-width:900px){
+
+            nav{
+                flex-direction:column;
+                gap:20px;
+            }
+
+            nav ul{
+                flex-wrap:wrap;
+                justify-content:center;
+                gap:15px;
+            }
+
+            .hero h1{
+                font-size:48px;
+            }
+
+            .hero p{
+                font-size:18px;
+                padding:0 20px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <nav>
+
+        <a href="index.html" class="logo">
+            🩸 <span>LifeDrop</span>
+        </a>
+
+        <ul>
+            <!--<li><a href="frontend/dashboard.html">Dashboard</a></li>-->
+            <li><a href="frontend/all-donor-list.html">Donor List</a></li>
+            <li><a href="frontend/donor-add.html">Add Donor</a></li>
+            <li><a href="frontend/update.html">Update Donor</a></li>
+            <li><a href="frontend/donor-remove.html">Remove Donor</a></li>
+        </ul>
+
+    </nav>
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <h1>LifeDrop</h1>
+
+            <p>
+                Smart Blood Donation Management System that connects
+                blood donors and recipients quickly, efficiently,
+                and securely.
+            </p>
+
+            <div class="hero-btn">
+                <a href="frontend/all-donor-list.html">
+                    Get Started
+                </a>
+            </div>
+
+        </div>
+
+    </section>
+
+</body>
+</html>
