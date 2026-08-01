@@ -779,9 +779,42 @@ class SudokuApp:
         style.configure("Horizontal.TScale", background="#f5f5f5")
     
     def create_widgets(self):
-        # Main container
-        self.main_container = ttk.Frame(self.root, padding=10)
-        self.main_container.pack(fill="both", expand=True)
+        # Create a wrapper frame for canvas and scrollbar
+        self.wrapper_frame = ttk.Frame(self.root)
+        self.wrapper_frame.pack(fill="both", expand=True)
+        
+        # Create Canvas for scrolling
+        self.canvas = tk.Canvas(self.wrapper_frame, bg="#f5f5f5", highlightthickness=0)
+        self.canvas.pack(side="left", fill="both", expand=True)
+        
+        # Create Scrollbar on the extreme right
+        self.scrollbar = ttk.Scrollbar(self.wrapper_frame, orient="vertical", command=self.canvas.yview)
+        self.scrollbar.pack(side="right", fill="y")
+        
+        # Configure Canvas with Scrollbar
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        # Main container inside Canvas (replaces the direct root attachment)
+        self.main_container = ttk.Frame(self.canvas, padding=10)
+        self.canvas_window = self.canvas.create_window((0, 0), window=self.main_container, anchor="nw")
+        
+        # Configure scrolling region dynamically based on window size
+        self.main_container.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.canvas.bind("<Configure>", lambda e: self.canvas.itemconfig(self.canvas_window, width=e.width))
+        
+        # Add mouse wheel support for scrolling convenience
+        def on_mousewheel(event):
+            if hasattr(event, 'delta') and event.delta != 0:
+                self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            elif hasattr(event, 'num'):
+                if event.num == 5:
+                    self.canvas.yview_scroll(1, "units")
+                elif event.num == 4:
+                    self.canvas.yview_scroll(-1, "units")
+                    
+        self.canvas.bind_all("<MouseWheel>", on_mousewheel)
+        self.canvas.bind_all("<Button-4>", on_mousewheel)
+        self.canvas.bind_all("<Button-5>", on_mousewheel)
         
         # Header
         header_frame = ttk.Frame(self.main_container)
@@ -1094,3 +1127,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = SudokuApp(root)
     root.mainloop()
+    
