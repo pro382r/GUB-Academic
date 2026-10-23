@@ -4,7 +4,7 @@ A simple Blood Donation Management System built using **HTML, CSS, JavaScript, P
 
 ---
 
-# 📦 Project Contents
+## 📦 Project Contents
 
 After extracting the project, you should have the following files:
 
@@ -21,7 +21,7 @@ BloodDonation/
 
 ---
 
-# 💻 System Requirements
+## 💻 System Requirements
 
 Before running the project, make sure the following software is installed:
 
@@ -30,7 +30,7 @@ Before running the project, make sure the following software is installed:
 
 ---
 
-# 🚀 Installation Guide
+## 🚀 Installation Guide
 
 ## Step 1: Install XAMPP
 
@@ -143,7 +143,7 @@ The project should now be running successfully.
 
 ---
 
-# ✨ Features
+## ✨ Features
 
 - Add New Donor
 - Update Donor Information
@@ -158,7 +158,7 @@ The project should now be running successfully.
 
 ---
 
-# 📁 Technologies Used
+## 📁 Technologies Used
 
 - HTML5
 - CSS3
@@ -169,7 +169,7 @@ The project should now be running successfully.
 
 ---
 
-# 📌 Notes
+## 📌 Notes
 
 - Apache and MySQL must be running before opening the project.
 - Always import the provided **blood_donation.sql** file before using the system.
@@ -178,7 +178,7 @@ The project should now be running successfully.
 
 ---
 
-# 👨‍💻 Developed By
+## 👨‍💻 Developed By
 
 **Md. Reahoon Zannah**
 
